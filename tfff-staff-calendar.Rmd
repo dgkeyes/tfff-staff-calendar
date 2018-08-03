@@ -53,12 +53,27 @@ data <- read_excel("data/data.xlsx", na = "TBD") %>%
      mutate(longitude = jitter(longitude, amount = .01)) %>% 
      mutate(city = str_replace(city, "Central Oregon", "Bend")) %>% 
      mutate(start_month = month(start_date)) %>% 
-     mutate(popup = paste(staff_person, 
+     mutate(end_month = month(end_date)) %>% 
+     mutate(start_date_formatted = as.Date(start_date)) %>% 
+     mutate(popup = paste("<strong>",
+                          staff_person,
+                          "</strong>",
+                          "<br>",
                           description,
+                          "<br>",
+                          month.abb[start_month],
+                          " ",
+                          day(start_date),
+                          " - ",
+                          month.abb[end_month],
+                          " ",
+                          day(end_date),
+                          "<br>",
                           city,
-                          start_date,
-                          end_date,
-                          sep = "<br>"))
+                          ", ",
+                          state,
+                          sep = ""))
+
 
 ```
 
@@ -76,30 +91,28 @@ Inputs {.sidebar}
 -------------------------------------
 
 ```{r}
- filter_slider("Date", 
-                   "Start Date", 
-                   dk_sd, 
-                   ~start_date, 
-                   dragRange = T,
-                   timeFormat = "%B %Y",
-                   ticks = F)
+filter_slider("Date", 
+              "", 
+              dk_sd, 
+              ~start_date_formatted, 
+              dragRange = T,
+              timeFormat = "%b %y",
+              ticks = F)
 ```
- 
+
 Column
 -------------------------------------
-    
+
 ### 
-    
+
 ```{r}
- leaflet(dk_sd) %>%
-          addProviderTiles(providers$CartoDB.Positron) %>%
-          addCircleMarkers(fillColor = tfff.light.green,
-                           color = tfff.dark.green,
-                           fillOpacity = .9,
-                           popup = data$popup)
+leaflet(dk_sd) %>%
+     addProviderTiles(providers$CartoDB.Positron) %>%
+     addCircleMarkers(fillColor = tfff.light.green,
+                      color = tfff.dark.green,
+                      fillOpacity = .9,
+                      popup = data$popup)
 ```
-
-
 
 
 
