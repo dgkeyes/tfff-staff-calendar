@@ -1,11 +1,106 @@
 ---
 title: "TFFF Staff Calendar"
-author: "David Keyes"
-date: "8/1/2018"
-output: html_document
+output: 
+  flexdashboard::flex_dashboard
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = F,
+                      include = T,
+                      message = F,
+                      warning = F)
+
+library(tidyverse)
+library(leaflet)
+library(googlesheets)
+library(readxl)
+library(janitor)
+library(naniar)
+library(crosstalk)
+library(DT)
+library(lubridate)
+library(glue)
+
+
 ```
+
+```{r themes}
+
+tfff.dark.green <- "#265142"
+tfff.light.green <- "#B5CC8E"
+tfff.orange <- "#e65100"
+tfff.yellow <- "#FBC02D"
+tfff.blue <- "#283593"
+tfff.red <- "#B71C1C"
+tfff.brown <- "#51261C"
+tfff.dark.gray <- "#545454"
+tfff.medium.gray <- "#a8a8a8"
+tfff.light.gray <- "#eeeeee"
+
+```
+
+
+
+```{r get_data}
+# gs_title("TFFF program staff calendar") %>%
+#      gs_download(to = "data/data.xlsx", overwrite = T)
+
+data <- read_excel("data/data.xlsx", na = "TBD") %>% 
+     clean_names() %>% 
+     filter(!is.na(end_date)) %>% 
+     filter(!is.na(city)) %>% 
+     mutate(latitude = jitter(latitude, amount = .01)) %>% 
+     mutate(longitude = jitter(longitude, amount = .01)) %>% 
+     mutate(city = str_replace(city, "Central Oregon", "Bend")) %>% 
+     mutate(start_month = month(start_date)) %>% 
+     mutate(popup = paste(staff_person, 
+                          description,
+                          city,
+                          start_date,
+                          end_date,
+                          sep = "<br>"))
+
+```
+
+
+
+```{r crosstalk}
+
+dk_sd <- SharedData$new(data)
+
+
+
+```
+
+Inputs {.sidebar}
+-------------------------------------
+
+```{r}
+ filter_slider("Date", 
+                   "Start Date", 
+                   dk_sd, 
+                   ~start_date, 
+                   dragRange = T,
+                   timeFormat = "%B %Y",
+                   ticks = F)
+```
+ 
+Column
+-------------------------------------
+    
+### 
+    
+```{r}
+ leaflet(dk_sd) %>%
+          addProviderTiles(providers$CartoDB.Positron) %>%
+          addCircleMarkers(fillColor = tfff.light.green,
+                           color = tfff.dark.green,
+                           fillOpacity = .9,
+                           popup = data$popup)
+```
+
+
+
+
+
 
