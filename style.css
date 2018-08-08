@@ -1,0 +1,19 @@
+#inputs {
+     background-color: #ffffff;
+}
+
+.navbar {
+     background-color: #265142;
+}
+
+.irs-from, .irs-to, .irs-single {
+
+    background: #265142;
+ 
+}
+
+.irs-bar {
+    border-top: 1px solid #265142;
+    border-bottom: 1px solid #265142;
+    background: #265142;
+}

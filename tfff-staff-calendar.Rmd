@@ -1,7 +1,8 @@
 ---
 title: "TFFF Staff Calendar"
 output: 
-  flexdashboard::flex_dashboard
+  flexdashboard::flex_dashboard:
+    css: style.css
 ---
 
 ```{r setup, include=FALSE}
@@ -90,6 +91,20 @@ dk_sd <- SharedData$new(data)
 Inputs {.sidebar}
 -------------------------------------
 
+### Notes
+
+Please note that darker points on the map indicate multiple trips. Zoom in to see them. 
+
+When you zoom in, please note that the dots are placed in approximate locations within municipalities. 
+
+You can also zoom out to see trips taken throughout the United States.
+
+Click on any point to learn more details about that trip.
+
+### Filter by Date
+
+Drag the filter below to see only trips taken during a particular time period.
+
 ```{r}
 filter_slider("Date", 
               "", 
@@ -102,11 +117,11 @@ filter_slider("Date",
 
 Column
 -------------------------------------
-
 ### 
 
 ```{r}
 leaflet(dk_sd) %>%
+     setView(-120.636236, 43.929386, 7) %>% 
      addProviderTiles(providers$CartoDB.Positron) %>%
      addCircleMarkers(fillColor = tfff.light.green,
                       color = tfff.dark.green,
