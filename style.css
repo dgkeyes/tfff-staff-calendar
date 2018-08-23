@@ -17,3 +17,13 @@
     border-bottom: 1px solid #265142;
     background: #265142;
 }
+
+.navbar-inverse .navbar-nav>.active>a, .navbar-inverse .navbar-nav>.active>a:hover, .navbar-inverse .navbar-nav>.active>a:focus {
+    color: #265142;
+    background-color: #ffffff;
+}
+
+.navbar-inverse .navbar-nav>li>a:hover, .navbar-inverse .navbar-nav>li>a:focus {
+    color: #ffffff;
+    background-color: #B5CC8E;
+}

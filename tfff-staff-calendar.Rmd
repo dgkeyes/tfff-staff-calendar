@@ -79,7 +79,8 @@ data <- read_excel("data/data.xlsx", na = "TBD") %>%
 ```
 
 
-
+Map
+=======================================================================
 ```{r crosstalk}
 
 dk_sd <- SharedData$new(data)
@@ -127,8 +128,52 @@ leaflet(dk_sd) %>%
                       color = tfff.dark.green,
                       fillOpacity = .9,
                       popup = data$popup)
+
+
+```
+
+```{r}
+
+
+
+data %>% 
+     arrange(end_date) %>% 
+     select(start_date:full_address) %>% 
+     select(-city, -state) %>% 
+     mutate(start_date_pretty = str_glue("{month.name[month(start_date)]} {day(start_date)}, {year(start_date)}")) %>% 
+     mutate(end_date_pretty = str_glue("{month.name[month(end_date)]} {day(end_date)}, {year(end_date)}")) %>% 
+     select(start_date_pretty, end_date_pretty, staff_person, full_address) %>% 
+     datatable(colnames = c("Start Date",
+                            "End Date",
+                            "People",
+                            "Destination"),
+               rownames = F)
+     
+```
 ```
 
 
+Table
+=======================================================================
+
+```{r}
+
+
+data %>% 
+     arrange(rev(end_date)) %>% 
+     select(start_date:full_address) %>% 
+     select(-city, -state) %>% 
+     mutate(start_date_pretty = str_glue("{month.name[month(start_date)]} {day(start_date)}, {year(start_date)}")) %>% 
+     mutate(end_date_pretty = str_glue("{month.name[month(end_date)]} {day(end_date)}, {year(end_date)}")) %>% 
+     select(start_date_pretty, end_date_pretty, staff_person, full_address) %>% 
+     datatable(colnames = c("Start Date",
+                            "End Date",
+                            "People",
+                            "Destination"),
+               rownames = F,
+               options = list(
+            pageLength = 10))
+     
+```
 
 
