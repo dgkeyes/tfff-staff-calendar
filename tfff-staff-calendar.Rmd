@@ -43,8 +43,8 @@ tfff.light.gray <- "#eeeeee"
 
 
 ```{r get_data}
-# gs_title("TFFF program staff calendar") %>%
-#      gs_download(to = "data/data.xlsx", overwrite = T)
+gs_title("TFFF program staff calendar") %>%
+     gs_download(to = "data/data.xlsx", overwrite = T)
 
 data <- read_excel("data/data.xlsx", na = "TBD") %>% 
      clean_names() %>% 
