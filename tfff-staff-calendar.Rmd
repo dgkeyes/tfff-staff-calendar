@@ -56,6 +56,9 @@ data <- read_excel("data/data.xlsx", na = "TBD") %>%
      mutate(start_month = month(start_date)) %>% 
      mutate(end_month = month(end_date)) %>% 
      mutate(start_date_formatted = as.Date(start_date)) %>% 
+     mutate(description = ifelse(is.na(description),
+                                 "No description",
+                                 description)) %>% 
      mutate(popup = paste("<strong>",
                           staff_person,
                           "</strong>",
