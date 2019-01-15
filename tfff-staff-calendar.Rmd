@@ -130,8 +130,7 @@ leaflet(dk_sd) %>%
      addCircleMarkers(fillColor = tfff.light.green,
                       color = tfff.dark.green,
                       fillOpacity = .9,
-                      popup = data$popup,
-                      clusterOptions = markerClusterOptions())
+                      popup = data$popup)
 
 
 ```
@@ -154,7 +153,7 @@ data %>%
                rownames = F)
      
 ```
-```
+
 
 
 Table
