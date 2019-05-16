@@ -89,7 +89,6 @@ Map
 dk_sd <- SharedData$new(data)
 
 
-
 ```
 
 Inputs {.sidebar}
