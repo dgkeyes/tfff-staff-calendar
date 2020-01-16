@@ -21,6 +21,7 @@ library(crosstalk)
 library(DT)
 library(lubridate)
 library(glue)
+library(ggmap)
 
 
 ```
@@ -40,46 +41,51 @@ tfff.light.gray <- "#eeeeee"
 
 ```
 
-
-
-```{r get_data}
-gs_title("TFFF program staff calendar") %>%
-     gs_download(to = "data/data.xlsx", overwrite = T)
-
-data <- read_excel("data/data.xlsx", na = "TBD") %>% 
-     clean_names() %>% 
-     filter(!is.na(end_date)) %>% 
-     filter(!is.na(city)) %>% 
-     mutate(latitude = jitter(latitude, amount = .01)) %>% 
-     mutate(longitude = jitter(longitude, amount = .01)) %>% 
-     mutate(city = str_replace(city, "Central Oregon", "Bend")) %>% 
-     mutate(start_month = month(start_date)) %>% 
-     mutate(end_month = month(end_date)) %>% 
-     mutate(start_date_formatted = as.Date(start_date)) %>% 
-     mutate(description = ifelse(is.na(description),
-                                 "No description",
-                                 description)) %>% 
-     mutate(popup = paste("<strong>",
-                          staff_person,
-                          "</strong>",
-                          "<br>",
-                          description,
-                          "<br>",
-                          month.abb[start_month],
-                          " ",
-                          day(start_date),
-                          " - ",
-                          month.abb[end_month],
-                          " ",
-                          day(end_date),
-                          "<br>",
-                          city,
-                          ", ",
-                          state,
-                          sep = ""))
-
+```{r}
+data <- read_excel("data/Program Staff Calendar Summary.xlsx", 
+                   na = "TBD",
+                   skip = 3) %>% 
+  clean_names() %>% 
+  separate_rows(city, sep = "/") %>% 
+  separate_rows(city, sep = " or ") %>% 
+  mutate(city = str_replace(city, "Central Oregon", "Bend")) %>% 
+  rename("staff_person" = "staff") %>% 
+  filter(!is.na(end_date)) %>% 
+  filter(!is.na(city)) %>% 
+  mutate(full_address = paste(city, state)) %>% 
+  mutate_geocode(full_address) %>% 
+  mutate(latitude = jitter(lat, amount = .01)) %>% 
+  mutate(longitude = jitter(lon, amount = .01)) %>% 
+  mutate(start_month = month(start_date)) %>% 
+  mutate(end_month = month(end_date)) %>% 
+  mutate(start_date_formatted = as.Date(start_date)) %>% 
+  mutate(description = ifelse(is.na(description),
+                              "No description",
+                              description)) %>% 
+  mutate(popup = paste("<strong>",
+                       staff_person,
+                       "</strong>",
+                       "<br>",
+                       description,
+                       "<br>",
+                       month.abb[start_month],
+                       " ",
+                       day(start_date),
+                       " - ",
+                       month.abb[end_month],
+                       " ",
+                       day(end_date),
+                       "<br>",
+                       city,
+                       ", ",
+                       state,
+                       sep = "")) %>% 
+  select(-c(lon, lat))
+  
 
 ```
+
+
 
 
 Map
@@ -124,33 +130,30 @@ Column
 
 ```{r}
 leaflet(dk_sd) %>%
-     setView(-120.636236, 43.929386, 7) %>% 
-     addProviderTiles(providers$CartoDB.Positron) %>%
-     addCircleMarkers(fillColor = tfff.light.green,
-                      color = tfff.dark.green,
-                      fillOpacity = .9,
-                      popup = data$popup)
+  setView(-120.636236, 43.929386, 7) %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  addCircleMarkers(fillColor = tfff.light.green,
+                   color = tfff.dark.green,
+                   fillOpacity = .9,
+                   popup = data$popup)
 
 
 ```
 
 ```{r}
-
-
-
 data %>% 
-     arrange(end_date) %>% 
-     select(start_date:full_address) %>% 
-     select(-city, -state) %>% 
-     mutate(start_date_pretty = str_glue("{month.name[month(start_date)]} {day(start_date)}, {year(start_date)}")) %>% 
-     mutate(end_date_pretty = str_glue("{month.name[month(end_date)]} {day(end_date)}, {year(end_date)}")) %>% 
-     select(start_date_pretty, end_date_pretty, staff_person, full_address) %>% 
-     datatable(colnames = c("Start Date",
-                            "End Date",
-                            "People",
-                            "Destination"),
-               rownames = F)
-     
+  arrange(end_date) %>% 
+  select(start_date:full_address) %>% 
+  select(-city, -state) %>% 
+  mutate(start_date_pretty = str_glue("{month.name[month(start_date)]} {day(start_date)}, {year(start_date)}")) %>% 
+  mutate(end_date_pretty = str_glue("{month.name[month(end_date)]} {day(end_date)}, {year(end_date)}")) %>% 
+  select(start_date_pretty, end_date_pretty, staff_person, full_address) %>% 
+  datatable(colnames = c("Start Date",
+                         "End Date",
+                         "People",
+                         "Destination"),
+            rownames = F)
+
 ```
 
 
@@ -162,20 +165,20 @@ Table
 
 
 data %>% 
-     arrange(rev(end_date)) %>% 
-     select(start_date:full_address) %>% 
-     select(-city, -state) %>% 
-     mutate(start_date_pretty = str_glue("{month.name[month(start_date)]} {day(start_date)}, {year(start_date)}")) %>% 
-     mutate(end_date_pretty = str_glue("{month.name[month(end_date)]} {day(end_date)}, {year(end_date)}")) %>% 
-     select(start_date_pretty, end_date_pretty, staff_person, full_address) %>% 
-     datatable(colnames = c("Start Date",
-                            "End Date",
-                            "People",
-                            "Destination"),
-               rownames = F,
-               options = list(
-            pageLength = 10))
-     
+  arrange(rev(end_date)) %>% 
+  select(start_date:full_address) %>% 
+  select(-city, -state) %>% 
+  mutate(start_date_pretty = str_glue("{month.name[month(start_date)]} {day(start_date)}, {year(start_date)}")) %>% 
+  mutate(end_date_pretty = str_glue("{month.name[month(end_date)]} {day(end_date)}, {year(end_date)}")) %>% 
+  select(start_date_pretty, end_date_pretty, staff_person, full_address) %>% 
+  datatable(colnames = c("Start Date",
+                         "End Date",
+                         "People",
+                         "Destination"),
+            rownames = F,
+            options = list(
+              pageLength = 10))
+
 ```
 
 
